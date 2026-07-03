@@ -1,0 +1,22 @@
+# --- Raw data & database (do not commit) ---
+data/raw/*
+!data/raw/.gitkeep
+data/db.sqlite3
+data/logs/etl.log
+
+# --- Environment ---
+.env
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

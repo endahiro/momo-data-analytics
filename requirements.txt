@@ -1,0 +1,13 @@
+# XML parsing (ElementTree ships with Python; lxml is faster/optional)
+lxml
+
+# Date parsing/normalization
+python-dateutil
+
+# Optional API layer (bonus)
+fastapi
+uvicorn
+pydantic
+
+# Testing
+pytest

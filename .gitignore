@@ -1,6 +1,7 @@
 # --- Raw data & database (do not commit) ---
 data/raw/*
 !data/raw/.gitkeep
+!data/raw/modified_sms_v2.xml
 data/db.sqlite3
 data/logs/etl.log
 

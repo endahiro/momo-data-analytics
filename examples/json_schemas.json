@@ -1,0 +1,125 @@
+{
+  "_comment": "JSON representations of the momo_analytics database entities. Each block shows how a row from the SQL table would look when serialized for an API response. The 'complete_transaction' example at the bottom demonstrates nested serialization for a client that wants the whole transaction context in one round-trip.",
+
+  "user": {
+    "_maps_to_sql_table": "users",
+    "example": {
+      "user_id": 2,
+      "full_name": "Jane Smith",
+      "phone_number": "250791666666",
+      "account_code": null,
+      "is_account_owner": false,
+      "created_at": "2024-05-10T16:00:00Z"
+    }
+  },
+
+  "transaction_category": {
+    "_maps_to_sql_table": "transaction_categories",
+    "example": {
+      "category_id": 3,
+      "category_name": "Transfer to Mobile",
+      "description": "Peer-to-peer transfer to another mobile number",
+      "direction": "DEBIT"
+    }
+  },
+
+  "transaction_flat": {
+    "_maps_to_sql_table": "transactions",
+    "_note": "Flat serialization — foreign keys are IDs only. Cheapest response for high-volume list endpoints.",
+    "example": {
+      "transaction_id": 4,
+      "external_tx_id": null,
+      "category_id": 3,
+      "sender_id": 1,
+      "receiver_id": 3,
+      "amount": 10000.00,
+      "fee": 100.00,
+      "new_balance": 28300.00,
+      "tx_datetime": "2024-05-11T20:34:47Z",
+      "sms_received_at": "2024-05-11T20:34:55Z"
+    }
+  },
+
+  "tag": {
+    "_maps_to_sql_table": "tags",
+    "example": {
+      "tag_id": 1,
+      "tag_name": "high_value",
+      "tag_color": "#E24B4A"
+    }
+  },
+
+  "system_log": {
+    "_maps_to_sql_table": "system_logs",
+    "example": {
+      "log_id": 3,
+      "transaction_id": null,
+      "log_level": "WARNING",
+      "source": "parser",
+      "message": "Skipped 40 non-transaction messages (OTP/system notifications)",
+      "logged_at": "2024-05-10T16:00:00Z"
+    }
+  },
+
+  "complete_transaction": {
+    "_note": "Fully-nested response — mirrors what GET /transactions/{id} would return. Foreign keys are expanded into full objects, and the M:N tags relation is collapsed into an array. This is the shape assignment 3's API will produce.",
+    "example": {
+      "transaction_id": 6,
+      "external_tx_id": "13947831685",
+      "amount": 25000.00,
+      "fee": 0.00,
+      "new_balance": 4060.00,
+      "tx_datetime": "2024-05-14T21:01:00Z",
+      "sms_received_at": "2024-05-14T21:01:09Z",
+
+      "category": {
+        "category_id": 6,
+        "category_name": "Direct Payment",
+        "direction": "DEBIT"
+      },
+
+      "sender": {
+        "user_id": 1,
+        "full_name": "Account Owner",
+        "phone_number": "250788110381",
+        "is_account_owner": true
+      },
+
+      "receiver": {
+        "user_id": 7,
+        "full_name": "DIRECT PAYMENT LTD",
+        "phone_number": null,
+        "account_code": "47842929",
+        "is_account_owner": false
+      },
+
+      "tags": [
+        { "tag_id": 1, "tag_name": "high_value",   "tag_color": "#E24B4A" },
+        { "tag_id": 4, "tag_name": "merchant",     "tag_color": "#7F77DD" },
+        { "tag_id": 3, "tag_name": "needs_review", "tag_color": "#EF9F27" }
+      ],
+
+      "logs": [
+        {
+          "log_id": 5,
+          "log_level": "WARNING",
+          "source": "cleaner",
+          "message": "Merchant name normalized from \"DIRECT PAYMENT LTD  \" (trailing whitespace)",
+          "logged_at": "2024-05-14T21:01:10Z"
+        }
+      ],
+
+      "raw_body": "A transaction of 25000 RWF by DIRECT PAYMENT LTD on your MOMO account was successfully completed."
+    }
+  },
+
+  "_sql_to_json_mapping": {
+    "users": "user",
+    "transaction_categories": "transaction_category",
+    "transactions (list endpoint)": "transaction_flat",
+    "transactions (detail endpoint)": "complete_transaction",
+    "tags": "tag",
+    "transaction_tags": "represented inline as tags[] array on the parent transaction",
+    "system_logs": "system_log"
+  }
+}

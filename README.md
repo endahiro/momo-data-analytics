@@ -182,3 +182,121 @@ The setup script ends with five sample queries that exercise the schema:
 
 Screenshots of these queries running against real data live under `screenshots/`
 and are embedded in the design document PDF.
+
+
+---
+
+# MoMo SMS Transactions API (Week 3)
+
+A REST API built on Python's standard library `http.server` that serves
+MoMo mobile-money transactions parsed from an SMS backup XML file. Includes
+HTTP Basic Auth and a small data-structures benchmark comparing linear
+search against dictionary lookup.
+
+> **Note on team setup:** completed individually with instructor's approval.
+
+## What's here
+
+```
+api/
+  server.py                REST server (stdlib only, no Flask/FastAPI)
+dsa/
+  parse_xml.py             XML → list[dict] parser (also exports JSON)
+  search_comparison.py     linear-search vs dict-lookup benchmark
+data/
+  raw/modified_sms_v2.xml  source SMS data
+  processed/               generated JSON output (created by parser)
+docs/
+  api_docs.md              full endpoint documentation
+  API_Report.pdf           PDF report with security discussion + DSA results
+screenshots/               curl test evidence for each endpoint
+```
+
+## Requirements
+
+Python 3.10+ — that's it. No third-party packages are needed for the API
+or the DSA script. Everything uses the standard library.
+
+## Setup
+
+```bash
+# 1. Clone the repo
+git clone https://github.com/endahiro/momo-data-analytics.git
+cd momo-data-analytics
+
+# 2. (Optional) create a virtual environment
+python -m venv .venv
+source .venv/bin/activate    # Windows: .venv\Scripts\activate
+
+# 3. Parse the XML into a JSON cache — required before the API starts
+python dsa/parse_xml.py
+```
+
+You should see something like:
+
+```
+Parsing data/raw/modified_sms_v2.xml ...
+Parsed 1683 transactions -> data/processed/transactions.json
+```
+
+## Running the API
+
+```bash
+python api/server.py
+```
+
+The server listens on `http://127.0.0.1:8000`. Change the port with
+`PORT=9000 python api/server.py`. Change credentials with
+`API_USERNAME=...` and `API_PASSWORD=...`. Default credentials are
+`admin` / `password123`.
+
+## Quick smoke test
+
+Once the server is running, from a second terminal:
+
+```bash
+# List all transactions
+curl -u admin:password123 http://127.0.0.1:8000/transactions
+
+# Fetch a single one
+curl -u admin:password123 http://127.0.0.1:8000/transactions/1
+
+# Create a new one
+curl -u admin:password123 -X POST http://127.0.0.1:8000/transactions \
+     -H "Content-Type: application/json" \
+     -d '{"category":"Bank Deposit","amount":5000}'
+
+# Update it
+curl -u admin:password123 -X PUT http://127.0.0.1:8000/transactions/1 \
+     -H "Content-Type: application/json" \
+     -d '{"amount":9999}'
+
+# Delete it
+curl -u admin:password123 -X DELETE http://127.0.0.1:8000/transactions/3
+
+# Verify auth: this should return 401
+curl -i http://127.0.0.1:8000/transactions
+```
+
+All endpoints are documented in `docs/api_docs.md`.
+
+## Running the DSA benchmark
+
+```bash
+python dsa/search_comparison.py
+```
+
+Prints a table showing per-lookup timings for 20 random target ids under
+both linear search (O(n)) and dictionary lookup (O(1) average). The
+dictionary is typically 100–300× faster on our dataset of ~1,683 items.
+Full results and interpretation are in `docs/API_Report.pdf`.
+
+## Security note
+
+The API uses **HTTP Basic Authentication** because the assignment requires
+it. Basic Auth is not suitable for production: credentials travel on every
+request in a form that's only base64-encoded (not encrypted), there is no
+expiry or revocation, and any interception permanently compromises the
+password. A production build would move to short-lived signed tokens
+(JWT) or delegated authorization (OAuth 2.0). Details in
+`docs/API_Report.pdf`.

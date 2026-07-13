@@ -300,3 +300,13 @@ expiry or revocation, and any interception permanently compromises the
 password. A production build would move to short-lived signed tokens
 (JWT) or delegated authorization (OAuth 2.0). Details in
 `docs/API_Report.pdf`.
+
+## AI Usage
+
+AI was used within the permitted categories from the assignment brief:
+
+- **Code syntax verification** — checking SQL constraint syntax and verifying regex patterns for XML parsing
+- **Grammar checking** — polishing wording in the README and design document
+- **MySQL best practices research** — verifying constraint and indexing conventions
+
+Schema design, endpoint structure, and all technical decisions are my own.
